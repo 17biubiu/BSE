@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    html, body{
+      color: #222;
+    }
+    .bse {
+      font-size: 14px;
+    }
+    .cursor {
+      width: 1px;
+      height: 16px;
+      background-color: #22222b;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 80;
+      pointer-events: none;
+      visibility: visible;
+      opacity: 0.5;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0% {
+          opacity: 0;
+      }
+
+      50% {
+          opacity: 1;
+      }
+      100% {
+          opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="bse">
+    <input type="text" id="hiddenInput" autocomplete="off" style="position: absolute; z-index: -1; font-size: 1px; width: 25px; height: 5px; left: 610px; opacity: 0; top: 166.066px;">
+    <div class="cursor"></div>
+  </div>
+  
+</body>
+<script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+<script>
+  let draw = SVG().addTo('body').size(1920, 768);
+  let x = 0;
+  let y = 0;
+  let cursor = document.querySelector('.cursor');
+  let input = document.querySelector('#hiddenInput');
+  let cursorx = 0;
+  document.addEventListener('keyup', (e) => {
+    // console.log(e)
+  })
+  document.addEventListener('click', (e) => {
+    input.value = '';
+    x = e.pageX;
+    y = e.pageY;
+    cursorx = x;
+    input.focus();
+    input.style.left = `${x}px`;
+    input.style.top = `${y}px`;
+    cursor.style.left = `${x}px`;
+    cursor.style.top = `${y - 8}px`;
+  })
+  // // 添加标记位 lock ,当用户未输入完时，lock 为 true
+  var lock = false;
+  // var inputEle = document.getElementById('bse');
+  // // input 事件中的处理逻辑, 这里仅仅打印文本
+  // var todo = function (text) {
+  //     console.dir(text)
+  // };
+  input.addEventListener('compositionstart', function () {
+      lock = true;
+  });
+  input.addEventListener('compositionend', function (event) {
+    console.log(event, cursorx, x)
+      lock = false;
+      let text = draw.text(event.data);
+      text.cx(cursorx - 2).cy(y)
+      // console.log('text', text.x())
+      x = text.x() + input.value.length * 16 + 2
+      cursorx = x
+      cursor.style.left = `${cursorx}px`
+      input.style.left = `${cursorx}px`;
+      // text.cx(parseInt(input.style.left) + input.value.length * 14).cy(y)
+      console.log(cursor.style.left)
+      // compositionend 事件发生在 input 之后，故此需要此处调用 input 中逻辑
+      // todo(event);
+  });
+  input.addEventListener('input', function (event) {
+      // 忽略一切非直接输入，不做逻辑处理
+      if (!lock) {
+        console.log('xxx', x)
+        let text = draw.text(event.data);
+        x += 9;
+        text.cx(x).cy(y)
+        x += 2
+        cursor.style.left = `${x}px`
+        input.style.left = `${x}px`
+      }
+  });
+</script>
+</html>
